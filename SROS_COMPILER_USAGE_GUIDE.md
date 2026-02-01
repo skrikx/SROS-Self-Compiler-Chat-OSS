@@ -1,4 +1,4 @@
-# File: USAGE_GUIDE_SOVEREIGN.md
+# File: SROS_COMPILER_USAGE_GUIDE.md
 
 ## SROS Self-Compiler (OSS) - Sovereign Usage Guide
 
