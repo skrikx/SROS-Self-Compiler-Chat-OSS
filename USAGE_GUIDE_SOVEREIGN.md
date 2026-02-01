@@ -2,92 +2,188 @@
 
 ## SROS Self-Compiler (OSS) - Sovereign Usage Guide
 
-This guide shows how to use the compiler in real chats, across domains, inside popular LLM apps, and what to do after you receive a `promptunit_package`.
+This guide shows:
+- how to run the SROS Self-Compiler in real chats
+- how to use the compiled prompts included in this repo
+- what to do after you receive a promptunit_package
+- how to iterate without drift
 
-### 1) Where to run this
-You can paste the agent XML into any LLM app that supports long system prompts or custom instructions, then use it in a normal chat.
+This is chat-first. No tooling required.
 
-Popular options:
-- ChatGPT (Custom Instructions or a pinned system prompt)
-- Claude (Projects)
-- Gemini (Gems)
-- Perplexity (Spaces, if long prompt allowed)
-- Cursor / Windsurf (as a prompt template, then run in chat)
-- Continue (prompt templates)
-- OpenWebUI (system prompt per chat)
+---
 
-Note: The output is XML-only. You should copy the full XML response as-is.
+## 1) Where to run this
 
-### 2) Operating modes
-#### Fast mode
-Start your message with:
-- `compile:`
+You can run the compiler and the demo agents inside any LLM chat that supports long messages.
 
-Use when you already know what you want.
+Common environments:
+- ChatGPT
+- Claude
+- Gemini
+- Perplexity
+- Cursor / Windsurf
+- Continue.dev
+- OpenWebUI
+- LM Studio / local UIs
 
-#### Refine mode
-Start your message with:
-- `refine:`
+Important:
+- Outputs are XML-only
+- Always copy the entire XML response as-is
+- Do not paraphrase or summarize compiler output
 
-Use when you want the compiler to ask for minimum missing details.
+---
 
-### 3) Multi-domain compiles
-You can ask for cross-domain outputs in one compile. Examples:
-- Product: app spec + UI copy + pricing page
-- Engineering: SRIR graph outline + CLI commands + receipts expectation
-- Marketing: landing page + ICP + offer + outbound scripts
-- Research: experiment plan + evaluation rubric + dataset schema
-- Visuals: prompt packs for image generation, plus style tokens
+## 2) Operating modes
+
+### Fast compile mode
+Use when you know what you want.
+
+compile: build a 5 page website for a local cleaning business
+
+### Refine mode
+Use when intent is incomplete.
+
+refine: I want something for my business but not sure what yet
+
+The compiler will emit a minimal intake form.
+
+---
+
+## 3) Multi-domain compiles
+
+You can compile across domains in one run.
+
+Examples:
+- Product + Engineering: deliverables=app_spec,ui_flows,api_contract
+- Marketing: deliverables=landing_page,offer,copy,cta
+- Research: deliverables=experiment_plan,evaluation_rubric
+- Visuals: deliverables=image_prompts,style_tokens
 
 Best practice:
-- Put deliverables as an explicit list
-- Put constraints as hard rules
+- Deliverables as an explicit list
+- Constraints as hard rules
 
-### 4) Sovereign depth switches (chat-friendly)
-If you want the compiler to behave in sovereign discipline, use one line inside your request:
+---
+
+## 4) Sovereign depth switches
+
+You can enforce stricter behavior inline.
 
 Example:
-`compile: ... | depth=sovereign | receipts=enforced | no_fake_scores=true | local_only=true`
+compile: build MVP | depth=sovereign | receipts=enforced | local_only=true
 
-Even though OSS v1 is not cryptographically deterministic, you still get:
-- receipts per stage
-- constraint locking and arbitration
-- governance gating behavior
+OSS v1 guarantees:
+- receipt emission per stage
+- constraint arbitration
+- governance gating
+- no fake precision
+- no provider coupling
 
-### 5) What you do after you receive the promptunit_package
-Your `promptunit_package` contains `sr8_prompt` artifacts. Use them like this:
+---
 
-Step A: Extract the active sr8_prompt
-- Find: `<sr8_prompts> ... <active> <![CDATA[ ... <sr8_prompt ...> ... </sr8_prompt> ... ]]> </active>`
+## 5) Using the demo agents included in this repo
 
-Step B: Run the sr8_prompt in your chosen execution environment
-Common patterns:
-1) Paste the `sr8_prompt` into an LLM and say: "Execute this sr8_prompt. Produce the deliverables in the manifest."
-2) If using a coding IDE assistant (Cursor/Windsurf), paste the `sr8_prompt` as the task spec and ask it to generate files.
+This repo includes chat-only demo SRX ACE agents:
+1) MVP Builder
+2) Landing Page Builder
+3) Deep Research Agent
 
-Step C: Store the package as a receipt
-- Save the full `promptunit_package` in a folder like:
-  - `./runs/YYYY-MM-DD/<release_or_placeholder>/package.xml`
-- That becomes your replay capsule for future improvements.
+How to run a demo agent:
+1) Open the agent XML file
+2) Paste the entire agent XML as the first message in a new chat
+3) Send it
+4) In the next message, give a normal instruction
 
-### 6) How to iterate without drift
-Do not rewrite the spec.
-Instead:
-- compile again with a delta:
-  - `compile: take the last package, keep constraints, add 2 case studies, tighten copy, keep stack.`
+Example:
+Build a landing page for a fintech startup targeting SMBs.
 
-### 7) Common templates
-#### Website
-`compile: build a 10 page site | deliverables=sitemap,design_tokens,copy_brief | constraints=stack:SvelteKit+Tailwind`
+The agent executes and returns one XML document.
 
-#### App feature
-`compile: add module X | deliverables=ui_spec,api_contract,tests | constraints=local_only`
+---
 
-#### SROS run
-`compile: design an SROS run | deliverables=graph_spec,cli_commands,receipts_list | constraints=no_web`
+## 6) What to do after you receive a promptunit_package
 
-### 8) Minimal troubleshooting
-- If you get an intake form but wanted compile: you were too vague. Use `compile:` and include deliverables.
-- If XML contains weird link wrapping: remove all `[` and `](` from your input and recompile.
-- If you need JSON/YAML output: that is a roadmap item, not in v1.
+Your promptunit_package contains sr8_prompt artifacts.
 
+### Step A - Extract the active sr8_prompt
+Find the sr8 prompt embedded in CDATA:
+
+<sr8_prompts>
+  <active>
+    <![CDATA[
+      <sr8_prompt ...>
+      ...
+      </sr8_prompt>
+    ]]>
+  </active>
+</sr8_prompts>
+
+### Step B - Execute the sr8_prompt
+Paste the sr8_prompt into a new chat and say:
+
+Execute this sr8_prompt. Produce the requested deliverables.
+
+Common uses:
+- Generate files
+- Generate docs
+- Generate UI specs
+- Generate research outputs
+
+### Step C - Store as receipt
+Save the full package:
+
+/runs/YYYY-MM-DD/<release_or_placeholder>/package.xml
+
+This becomes your replay capsule.
+
+---
+
+## 7) Iterating without drift
+
+Do not rewrite the spec manually.
+
+Instead, recompile with deltas:
+compile: take the last package, keep constraints, add 2 case studies, tighten copy
+
+The compiler preserves:
+- constraints
+- intent lineage
+- governance posture
+
+---
+
+## 8) Common compile templates
+
+Website:
+compile: build a 10 page site
+| deliverables=sitemap,design_tokens,copy
+| constraints=stack:SvelteKit+Tailwind
+
+App feature:
+compile: add auth module
+| deliverables=ui_spec,api_contract,tests
+| constraints=local_only
+
+SROS run design:
+compile: design an SROS run
+| deliverables=graph_spec,cli_commands,receipts_list
+| constraints=no_web
+
+---
+
+## 9) Minimal troubleshooting
+
+- Intake form appears unexpectedly: intent too vague, add deliverables
+- XML contains wrapped links: remove [ and ]( from input and re-run
+- Want JSON/YAML output: roadmap item, not in OSS v1
+
+---
+
+## Final note
+
+This repo is designed so that:
+- the compiler turns intent into executable prompts
+- the included demo agents can be run immediately
+- outputs are portable across chats and environments
+
+Intent in. Artifacts out. Receipts preserved.
