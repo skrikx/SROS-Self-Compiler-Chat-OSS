@@ -6,7 +6,7 @@ This repository contains the **open-source SROS Self-Compiler**, a chat-native c
 This is **not a chatbot prompt**.  
 This is **not an agent personality**.  
 
-This is a **compiler specification and runtime contract** designed to run inside any modern chat environment.
+This is a **compiler specification and runtime contract** designed to run inside any modern chat environment. Read the Usage Guide for m
 
 ---
 
@@ -38,6 +38,32 @@ All outputs are:
 - Not an execution runtime
 
 This repo **stops at compilation**.
+
+---
+
+### FAQ
+Start here if you want to understand what this repo is and is not, what "compile:" means, and how OSS mode behaves:
+- `FAQ.md`
+
+### Usage Guide
+This is the step-by-step guide for using the compiler in real chats and what to do after you receive a `promptunit_package`:
+- `SROS_COMPILER_USAGE_GUIDE.md`
+
+### Agent Examples (Chat-only demos)
+These are **chat-only** SRX ACE agents you can paste into any chat and run. They are intentionally designed as demos anyone can tailor:
+- `agents/demo/`
+
+Included demos:
+- `SRX.ACE.Demo.MVPBuilder.OSS.v1.xml`
+- `SRX.ACE.Demo.LandingPageBuilder.OSS.v1.xml`
+- `SRX.ACE.Demo.DeepResearchAgent.OSS.v1.xml`
+
+### Quick path
+If you want the fastest path to seeing it work:
+1. Open an example in `examples/` (start with `01-fast-compile.txt`)
+2. Paste the compiler agent from `agents/`
+3. Run `compile: ...`
+4. Use the extracted `sr8_prompt` from the resulting `promptunit_package`
 
 ---
 
