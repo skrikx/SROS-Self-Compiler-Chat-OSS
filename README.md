@@ -1,174 +1,192 @@
-# SROS Self-Compiler (OSS) - Chat Friendly Apex v1
+# SROS Self-Compiler (OSS)
+### Chat-Friendly Sovereign Compiler Front Door
 
-This is the open-source release of the **SROS Self-Compiler (OSS)** - a chat-first compiler agent that turns a short message into a structured, receipt-driven XML artifact.
+This repository contains the **open-source SROS Self-Compiler**, a chat-native compiler that converts raw human intent into **sealed, receipt-driven build artifacts**.
 
-It is designed to be:
-- **Chat-friendly**: type `compile:` and get a compiled package
-- **Receipt-driven**: every major decision produces a receipt
-- **Schema-clean**: XML-only outputs, no markdown pollution in fields
-- **OSS-safe**: no fake precision, no numeric trust scores, hashing optional in v1
-- **Portable**: works as a prompt-spec in any chat environment that supports long-form system instructions
+This is **not a chatbot prompt**.  
+This is **not an agent personality**.  
 
-This repo ships an **SRX ACE v2 agent prompt-spec** (not an executable binary compiler yet). It is intended to be used as a canonical "front door" for generating structured build prompts and packages.
+This is a **compiler specification and runtime contract** designed to run inside any modern chat environment.
 
 ---
 
-## Official Links
+## What This Project Is
 
-- **PlatXP Creative**: https://platxpcreative.com  
-- **SROS**: https://sros.cloud  
-- **FlowXP**: https://flowxp.org  
-- **SROS v2 Repo**: https://github.com/skrikx/SROS_v2  
+The SROS Self-Compiler is a **deterministic intent compiler**.
 
----
+You give it intent.  
+It returns a **sealed XML package** containing:
+- Canonicalized intent
+- Governance decisions
+- Receipts
+- One or more `sr8_prompt` build artifacts
 
-## What it does
-
-You type:
-
-`compile: build a 10 page enterprise AI agency website for PlatXP (USA), cobalt blue aesthetic, include sitemap + copy brief, stack SvelteKit + Tailwind + Motion One`
-
-You get back exactly one XML artifact:
-
-`<promptunit_package xmlns="https://srx.sros/schema/package/v2"> ... </promptunit_package>`
-
-That package contains:
-- `replay_capsule` (normalized intent + versioning hints)
-- adapter selection receipt (what modalities were detected)
-- model routing receipt (abstract stages, not provider-specific)
-- MirrorOS lens set (no numeric scores in OSS mode)
-- governance receipt (allow, gate, refuse)
-- `sr8_prompt` artifact(s) inside `sr8_prompts` (the build payload)
-- compile report (what happened)
+All outputs are:
+- XML-only
+- Schema-clean
+- Receipt-driven
+- OSS-safe (no fake precision, no numeric trust scores)
 
 ---
 
-## Quick start
+## What This Project Is NOT
 
-### Fast mode
-Prefix any request with `compile:`.
+- Not a chatbot
+- Not a generic “system prompt”
+- Not tied to any specific LLM provider
+- Not a SaaS
+- Not an execution runtime
 
-Example:
-`compile: build a 10 page agency site, cobalt blue style, USA market, stack SvelteKit + Tailwind + Motion One`
-
-Expected response root:
-- `promptunit_package`
-
-### Refine mode
-If your request is vague, the compiler returns a short form (`compiler_input_form`) asking for:
-- goal
-- deliverables
-- constraints
-- optional style preferences
-- runtime capabilities flags
-
-You reply with the filled `<compiler_input>` block.
+This repo **stops at compilation**.
 
 ---
 
-## Output rules
+## How This Fits Into SROS
 
-The compiler always outputs exactly one XML document per response:
-- `compiler_input_form` (intake mode), or
-- `promptunit_package` (compile mode)
+**SROS (Sovereign Recursive Operating System)** is an architectural framework for governed, agentic AI systems.
 
-No markdown is emitted. No prose outside XML.
+At a high level, SROS separates:
+- Intent intake
+- Compilation
+- Orchestration
+- Runtime execution
+- Memory
+- Governance
 
----
+This repository provides **only one thing**:
 
-## Repository contents
+> The open-source, chat-friendly **compiler entrypoint** for SROS.
 
-- `SRX.ACE.SelfCompiler.OSS.ChatFriendly.Apex.v1.xml`  
-  The public entrypoint agent prompt-spec.
-
-- `examples/01-fast-compile.txt`  
-  Example using `compile:` fast mode.
-
-- `examples/02-refine-then-compile.txt`  
-  Example showing refine form then compile.
-
-- `LICENSE`  
-  Open source license.
+It is the front door that turns intent into structured, governable build artifacts.
 
 ---
 
-## OSS hygiene guarantees (v1)
+## Core Components in This Repo
 
-### No fake precision
-This OSS release does not output numeric trust scores or numeric lens scores.
-Scoring uses `score_class` only (high, medium, low) when needed.
+### 1. Self-Compiler Spec (v3)
+A full compiler specification that defines:
+- Intake rules
+- Adapter selection
+- Model routing (abstract targets only)
+- MirrorOS lens enforcement
+- SR8 compilation
+- SR9 orchestration wiring
+- Receipt emission
+- Sealed package output
 
-### Hashing is optional in v1
-Hash fields may appear as placeholders:
-- `status="optional" kind="placeholder"`
-
-This is intentional for early OSS release. Future versions can add canonical byte serialization and real hashing.
-
-### URI sanitization
-The agent refuses or sanitizes link-wrapped URIs.
-Disallowed patterns include:
-- `google.com/search?q=`
-- markdown link shapes like `](...)` or `[...]`
+Users **never edit the spec**.
+They only provide intent.
 
 ---
 
-## Governance behavior
+### 2. Hygiene + Intake XML
+Minimal XML forms used when:
+- Intent is vague
+- Deliverables are unclear
+- Constraints are missing
 
-The compiler classifies each request and emits:
-- `decision=ALLOW` for safe compilation
-- `decision=GATE_REQUIRED` for high-risk requests (emits an approval artifact contract)
-- `decision=REFUSE` for disallowed requests (emits a safe alternative `sr8_prompt` instead)
-
----
-
-## Non-goals (v1)
-
-This release is not:
-- a cryptographically deterministic compiler
-- a guarantee of correctness
-- a runtime engine that executes tools or deploys apps
-- a registry-backed model router with provider enforcement (routing is abstract in OSS v1)
+This keeps the compiler chat-friendly without leaking internals.
 
 ---
 
-## Credits and authorship
+### 3. Demo SRX ACE Agents (Chat-Only)
 
-### Creator
-- **Muqeet ul Hassan** (Skrikx Kyōten) - original author, system architect, and primary maintainer.
+This repo ships **three example SRX ACE agents** as **chat-only prompts**.
 
-### Project lineage
-This compiler is part of the broader SROS ecosystem:
-- **SR8** - compiler discipline and prompt rendering
-- **SRX ACE v2** - agent container format and packaging
-- **SR9** - orchestration receipts (DAG-level compilation), bounded tighten loops
-- **MirrorOS** - lens arbitration and constraint locking
+They are:
+- Meant to be pasted directly into chat
+- Fully tailorable
+- Independent of system roles
+- Compatible with any chat app
 
-### Attribution request
-If you use this project in public content, demos, or derivative repos, please include:
-- “Built with SROS Self-Compiler (OSS) by Muqeet ul Hassan.”
+Included demos:
 
----
+1. **MVP Builder Agent**  
+   Converts product ideas into MVP build artifacts.
 
-## Branding and naming
+2. **Landing Page Builder Agent**  
+   Compiles high-signal landing pages with structure, copy, and constraints.
 
-- **SROS** - Sovereign Recursive Operating System  
-- **Skrikx Kyōten** - operator identity used for continuity across artifacts  
-- **PlatXP** - the public-facing studio and empire node through which SROS artifacts are shipped  
+3. **Deep Research Agent**  
+   Produces scoped, receipt-driven research artifacts without hallucinated certainty.
 
----
-
-## Roadmap (optional)
-
-If you want to contribute, the highest-leverage next steps:
-1) Add JSON and YAML output modes (same semantics, different serialization)
-2) Add a CLI validator (lint for URI wrapping, numeric scores, single-root output)
-3) Add registry-backed model IDs (optional, behind a config file)
-4) Add canonical hashing and sealing (v2)
+These are examples, not limits.
 
 ---
 
-## Contact / updates
+## How To Use (Fast Path)
 
-Official:
-- PlatXP: https://platxpcreative.com
-- SROS: https://sros.cloud
+### Option 1: One-Line Compile
+Start your message with:
+
+compile: build a professional landing page for a local laundry business
+
+The compiler will:
+- Infer minimal OSS constraints
+- Compile intent
+- Emit a sealed `promptunit_package`
+
+---
+
+### Option 2: Refined Intake
+If the compiler needs clarity, it will return an XML intake form.
+
+You fill it.
+Send it back.
+Compilation resumes.
+
+---
+
+## Output Guarantees
+
+Every successful compile returns **exactly one XML document**:
+- Root: `<promptunit_package>`
+- Schema-valid
+- Receipt-complete
+- No markdown
+- No prose outside XML
+
+If compilation is not allowed, a **safe alternative** is compiled instead and governance is marked accordingly.
+
+---
+
+## Open Source Philosophy
+
+This OSS release intentionally:
+- Avoids numeric trust scores
+- Avoids provider-specific routing
+- Avoids fake determinism
+- Keeps hashing optional
+- Keeps governance explicit
+
+Enterprise features, proprietary policy bundles, and production kernels are **out of scope**.
+
+---
+
+## Who This Is For
+
+- Builders who want **intent → structure**, not vibes
+- Researchers exploring compiler-style prompting
+- OSS contributors experimenting with governed agents
+- Anyone tired of “just prompts” with no receipts
+
+---
+
+## Credits
+
+Built by **Muqeet ul Hassan**  
+Under the SROS architecture
+
+- SROS: https://sros.cloud  
+- PlatXP: https://platxpcreative.com  
+
+---
+
+## Final Note
+
+If you can paste text into a chat,  
+you can run this compiler.
+
+That is the point.
+
+
