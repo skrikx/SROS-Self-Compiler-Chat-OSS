@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sros_self_compiler
+  xmlns="https://sros.cloud/schema/selfcompiler/v3"
+  id="SROS.SelfCompiler.v3"
+  version="3.0.0"
+  mode="Apex"
+  recursion="Sovereign"
+  tenant="SROS"
+  oss_release="true">
+
+  <description>
+    <name>SROS Self-Compiler Spec v3</name>
+    <summary>
+      Canonical, repo-aligned compiler specification for the OSS chat-first self-compiler.
+      This file is the source of truth for planes, adapter registry, routing behavior, MirrorOS policy,
+      SR8 compile expectations, and SR9 tighten loop constraints. No agent wrapper logic lives here.
+    </summary>
+    <scope>
+      <item>Chat-first intake to sr8_prompt package compilation</item>
+      <item>Receipt-driven compilation pipeline</item>
+      <item>OSS-safe output rules (no fake precision, optional hashing)</item>
+      <item>Multi-modal adapters and multi-model routing abstraction</item>
+      <item>MirrorOS lenses and arbitration constraints</item>
+      <item>SR9 consciousness tighten loop for compilation refinement</item>
+    </scope>
+  </description>
+
+  <oss_policy xmlns="https://sros.cloud/schema/oss_policy/v1" id="OSS.Policy.Apex.v1" version="1.0.0">
+    <output_mode>xml_only</output_mode>
+    <single_root>true</single_root>
+    <no_markdown_anywhere>true</no_markdown_anywhere>
+    <no_numeric_scores>true</no_numeric_scores>
+    <hashing_default>optional</hashing_default>
+    <provider_fields>omit</provider_fields>
+    <uri_sanitation>
+      <reject_contains>google.com/search?q=</reject_contains>
+      <reject_contains>[</reject_contains>
+      <reject_contains>](</reject_contains>
+    </uri_sanitation>
+    <placeholders>
+      <allowed>true</allowed>
+      <placeholder_attr_status>optional</placeholder_attr_status>
+      <placeholder_attr_kind>placeholder</placeholder_attr_kind>
+    </placeholders>
+  </oss_policy>
+
+  <planes>
+
+    <adapter_plane
+      xmlns="https://sros.cloud/schema/adapters/v1"
+      id="SROS.AdapterPlane.v1"
+      version="1.0.0">
+
+      <adapter_registry id="adapter.registry.core.v1" version="1.0.0">
+        <adapters>
+
+          <adapter id="adapter.text.normalize.v1"
+                   modality_in="text"
+                   modality_out="text"
+                   status="active"/>
+
+          <adapter id="adapter.image.describe.v1"
+                   modality_in="image"
+                   modality_out="text"
+                   status="active"/>
+
+          <adapter id="adapter.audio.transcribe.v1"
+                   modality_in="audio"
+                   modality_out="text"
+                   status="active"/>
+
+          <adapter id="adapter.video.summarize.v1"
+                   modality_in="video"
+                   modality_out="text"
+                   status="active"/>
+
+          <adapter id="adapter.doc.parse.v1"
+                   modality_in="document"
+                   modality_out="text"
+                   status="active"/>
+
+        </adapters>
+
+        <selection_rules>
+          <rule id="AR1.always_text_normalize">
+            Always include adapter.text.normalize.v1.
+          </rule>
+          <rule id="AR2.optional_by_capability">
+            Select optional modality adapters only when runtime capability for that modality is true.
+          </rule>
+        </selection_rules>
+      </adapter_registry>
+
+      <model_router
+        xmlns="https://sros.cloud/schema/router/v1"
+        id="SROS.ModelRouter.v1"
+        version="1.0.0">
+
+        <routing_policy>
+          <abstraction_targets>
+            <target id="small"/>
+            <target id="quality"/>
+          </abstraction_targets>
+
+          <stage_routes>
+            <route stage="normalize" target="small"/>
+            <route stage="forge_ast" target="quality"/>
+            <route stage="render" target="quality"/>
+            <route stage="eval_select" target="quality"/>
+            <route stage="sr9_compile" target="quality"/>
+          </stage_routes>
+
+          <rules>
+            <rule id="MR1.no_provider_fields_oss">Do not emit provider fields in OSS mode.</rule>
+            <rule id="MR2.targets_only_oss">Route to abstract targets only: small, quality.</rule>
+          </rules>
+        </routing_policy>
+      </model_router>
+
+    </adapter_plane>
+
+    <mirroros
+      xmlns="https://mirroros.sros/schema/core/v1"
+      id="MirrorOS.Inbuilt.v1"
+      version="1.0.0">
+
+      <policy>
+        <quiet>true</quiet>
+        <no_risk_shadows_by_default>true</no_risk_shadows_by_default>
+        <max_lenses>12</max_lenses>
+        <no_numeric_scores>true</no_numeric_scores>
+        <receipts_first>true</receipts_first>
+      </policy>
+
+      <lenses>
+        <lens id="LENS.SOVEREIGN.V1" status="active"/>
+        <lens id="LENS.DETERMINISM.V1" status="active"/>
+        <lens id="LENS.OSS_HYGIENE.V1" status="active"/>
+        <lens id="LENS.ROLE_CLARITY.V1" status="active"/>
+      </lenses>
+
+      <arbitration>
+        <lock_rules>
+          <rule id="MA1.lock_deliverables">Lock deliverables once inferred or declared.</rule>
+          <rule id="MA2.lock_constraints">Lock constraints once inferred or declared.</rule>
+        </lock_rules>
+      </arbitration>
+
+    </mirroros>
+
+    <srx_plane
+      xmlns="https://srx.sros/schema/plane/v2"
+      id="SRX.Plane.v2"
+      version="2.0.0">
+      <capabilities>
+        <package_schema_uri>https://srx.sros/schema/package/v2</package_schema_uri>
+        <ace_schema_uri>https://srx.sros/schema/ace/v2</ace_schema_uri>
+      </capabilities>
+    </srx_plane>
+
+    <sr8_plane
+      xmlns="https://sr8.sros/schema/v3"
+      id="SR8.Compiler.v3"
+      version="3.0.0">
+
+      <compile_contract>
+        <artifact_kind>sr8_prompt</artifact_kind>
+        <prompt_schema_uri>https://sr8.sros/schema/prompt/v1</prompt_schema_uri>
+        <default_prompt_role>SR8 Build Prompt</default_prompt_role>
+        <enforced_sections>
+          <section id="role"/>
+          <section id="objective"/>
+          <section id="inputs"/>
+          <section id="output_contract"/>
+          <section id="acceptance_tests"/>
+        </enforced_sections>
+        <oss_rules>
+          <rule id="SR8O1.no_markdown_in_fields">No markdown in XML fields.</rule>
+          <rule id="SR8O2.no_numeric_scores">No numeric scores in any receipt fields.</rule>
+        </oss_rules>
+      </compile_contract>
+
+    </sr8_plane>
+
+    <sr9_plane
+      xmlns="https://sr9.sros/schema/v2"
+      id="SR9.Orchestrator.v2"
+      version="2.0.0">
+
+      <consciousness_loops enabled="true">
+        <loop id="tighten_loop" max_iters="3">
+          <purpose>Intent refinement and constraint stabilization during compilation.</purpose>
+          <stop_conditions>
+            <condition id="C1.constraints_locked">Constraints locked.</condition>
+            <condition id="C2.deliverables_locked">Deliverables locked.</condition>
+            <condition id="C3.oss_hygiene_clean">OSS hygiene clean.</condition>
+          </stop_conditions>
+        </loop>
+      </consciousness_loops>
+
+    </sr9_plane>
+
+  </planes>
+
+  <lint
+    xmlns="https://sros.cloud/schema/lint/oss/v1"
+    id="OSS_LINT_V1"
+    version="1.0.0">
+
+    <rules>
+      <rule id="L1.single_root_output">Reject output that is not exactly one XML document.</rule>
+      <rule id="L2.no_markdown_uris">Reject any URI containing '[' or ']' or ']('.</rule>
+      <rule id="L3.no_google_wrapped_uris">Reject any URI containing 'google.com/search?q='.</rule>
+      <rule id="L4.no_numeric_scores">Reject trust_score fields and numeric score attributes.</rule>
+      <rule id="L5.schema_uri_plain">Schema URIs must be plain and must not be wrapped.</rule>
+    </rules>
+
+  </lint>
+
+  <versioning xmlns="https://sros.cloud/schema/versioning/v1">
+    <compat>
+      <package_schema>https://srx.sros/schema/package/v2</package_schema>
+      <sr8_prompt_schema>https://sr8.sros/schema/prompt/v1</sr8_prompt_schema>
+      <sr9_schema>https://sr9.sros/schema/v2</sr9_schema>
+      <mirroros_schema>https://mirroros.sros/schema/core/v1</mirroros_schema>
+    </compat>
+  </versioning>
+
+</sros_self_compiler>
